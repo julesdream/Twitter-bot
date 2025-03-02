@@ -1,8 +1,8 @@
 require('dotenv').config();
+
 const axios = require('axios');
 const { TwitterApi } = require('twitter-api-v2');
 const fs = require('fs');
-const request = require('request');
 
 const twitterClient = new TwitterApi(
   {
@@ -17,16 +17,13 @@ const twitterClient = new TwitterApi(
 // Função para carregar o contador
 function loadCounter() {
   try {
-    const data = fs.readFileSync('counter.json', 'utf8');
-    return JSON.parse(data).days;
+    const startedAt = new Date(process.env.STARTED_AT * 1000)
+    const currentDate = new Date()
+    const diffDays = parseInt((currentDate - startedAt) / (1000 * 60 * 60 * 24));
+    return diffDays
   } catch (error) {
     return 1; // Se der erro, começa do dia 1
   }
-}
-
-// Função para salvar o contador atualizado
-function saveCounter(day) {
-  fs.writeFileSync('counter.json', JSON.stringify({ days: day }), 'utf8');
 }
 
 const download_image = (url, image_path) =>
@@ -64,14 +61,13 @@ async function postCatPhoto() {
 
     console.log(`Tweet do Dia ${dayCount} enviado com sucesso!`);
 
-    // Atualiza o contador e salva
-    saveCounter(dayCount + 1);
   } catch (error) {
     console.error('Erro ao postar no Twitter:', error);
   }
 }
 
 // Agendar para rodar todos os dias às 12h
+
 setInterval(() => {
   const date = new Date();
   const minutes = date.getMinutes();
